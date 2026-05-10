@@ -1,0 +1,49 @@
+stages:
+  - test
+  - build
+  - deploy
+
+variables:
+  PYTHON_VERSION: "3.11"
+
+test-backend:
+  stage: test
+  image: python:3.11
+  script:
+    - cd backend
+    - pip install -r requirements.txt
+    - python -m pytest tests/ -v
+  only:
+    - merge_requests
+    - main
+
+build-frontend:
+  stage: build
+  image: node:20
+  script:
+    - cd frontend
+    - npm ci
+    - npm run build
+  artifacts:
+    paths:
+      - frontend/dist/
+  only:
+    - main
+
+deploy-ec2:
+  stage: deploy
+  script:
+    - apt-get update && apt-get install -y openssh-client
+    - eval $(ssh-agent -s)
+    - echo "$EC2_SSH_KEY" | ssh-add -
+    - ssh -o StrictHostKeyChecking=no ubuntu@$EC2_HOST "
+        cd /app/shuttle-tracking &&
+        git pull origin main &&
+        cd backend && pip install -r requirements.txt &&
+        sudo systemctl restart shuttle-backend &&
+        cd ../frontend && npm ci && npm run build
+      "
+  environment:
+    name: production
+  only:
+    - main

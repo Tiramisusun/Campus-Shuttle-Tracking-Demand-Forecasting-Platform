@@ -1,0 +1,29 @@
+# System Prerequisites
+Python==3.11+
+Node.js==20+
+npm==10+
+MySQL==8.0
+Redis==5+
+
+# Backend Python packages (see backend/requirements.txt for full list)
+flask==3.0.3
+flask-cors==4.0.1
+flask-socketio==5.3.6
+flask-sqlalchemy==3.1.1
+pymysql==1.1.1
+redis==5.0.8
+prophet==1.1.5
+pandas==2.2.2
+python-dotenv==1.0.1
+gunicorn==22.0.0
+
+# Frontend Node packages (see frontend/package.json for full list)
+react==18.3.1
+react-dom==18.3.1
+react-router-dom==6.24.0
+leaflet==1.9.4
+react-leaflet==4.2.1
+recharts==2.12.7
+socket.io-client==4.7.5
+axios==1.7.2
+vite==5.3.4
