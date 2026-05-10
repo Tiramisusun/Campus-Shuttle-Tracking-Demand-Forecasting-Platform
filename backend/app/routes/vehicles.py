@@ -1,9 +1,16 @@
 from flask import Blueprint, jsonify, request
+from flask_socketio import emit
 from ..models.vehicle import Vehicle
 from ..extensions import db, redis_client
+from .. import socketio
 import json
 
 vehicles_bp = Blueprint("vehicles", __name__)
+
+@socketio.on("connect")
+def handle_connect():
+    vehicles = Vehicle.query.all()
+    emit("vehicles_initial", [v.to_dict() for v in vehicles])
 
 @vehicles_bp.get("/")
 def list_vehicles():
@@ -29,4 +36,5 @@ def update_location(vehicle_id):
     vehicle.current_lng = data["lng"]
     db.session.commit()
     redis_client.delete("vehicles:all")
+    socketio.emit("vehicle_update", {"id": vehicle.id, "lat": vehicle.current_lat, "lng": vehicle.current_lng})
     return jsonify(vehicle.to_dict())

@@ -14,21 +14,24 @@ conn = pymysql.connect(
     database="shuttle_tracking",
 )
 
-routes = ["Main Gate → Library", "Main Gate → Dorm A", "Library → Lab Building", "Dorm A → Cafeteria"]
+routes = ["Blackrock DART → Belfield", "Belfield → Blackrock DART"]
 now = datetime.utcnow()
+
+# Shuttle only runs 8-10:30am and 4-6:30pm on weekdays
+MORNING_HOURS = (8, 9, 10)
+EVENING_HOURS = (16, 17, 18)
+ACTIVE_HOURS = MORNING_HOURS + EVENING_HOURS
 
 rows = []
 for day_offset in range(90):
-    for hour in range(7, 23):
+    date = now - timedelta(days=day_offset)
+    if date.weekday() >= 5:  # skip weekends
+        continue
+    for hour in ACTIVE_HOURS:
         for route in routes:
-            ts = now - timedelta(days=day_offset) + timedelta(hours=hour - now.hour)
-            # Peak hours: 8-9am, 12-13pm, 17-19pm
-            base = 5
-            if hour in (8, 9, 12, 13, 17, 18):
-                base = 20
-            elif hour in (7, 10, 11, 14, 15, 16, 19):
-                base = 12
-            count = max(0, int(random.gauss(base, 3)))
+            ts = date.replace(hour=hour, minute=0, second=0, microsecond=0)
+            base = 20 if hour in (8, 9, 17, 18) else 12
+            count = max(0, int(random.gauss(base, 4)))
             rows.append((route, ts, count))
 
 with conn.cursor() as cur:

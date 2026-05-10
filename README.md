@@ -113,12 +113,21 @@ MySQL is installed to `/usr/local/mysql` and starts automatically after installa
 mysql -u root -p < database/schema.sql
 ```
 
-Generate 90 days of training data for the forecasting model:
+Generate 90 days of simulated passenger demand data (weekdays only, morning 8–10:30 and evening 16–18:30) for the Prophet forecasting model:
 
 ```bash
 cd database
 pip install pymysql python-dotenv
 python seed_demand.py
+# Inserts demand records for routes: Blackrock DART → Belfield, Belfield → Blackrock DART
+```
+
+Simulate real-time GPS movement of the 3 shuttle buses along the Blackrock–Belfield route (requires backend to be running):
+
+```bash
+python simulate_gps.py
+# Buses move between: Blackrock DART Station → UCD Smurfit → UCD Belfield Village
+# Position updates every 2 seconds via POST /api/vehicles/:id/location
 ```
 
 ### 2. Backend
